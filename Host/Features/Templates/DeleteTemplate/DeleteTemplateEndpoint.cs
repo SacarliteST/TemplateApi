@@ -1,4 +1,5 @@
-using TemplateApi.Application.Services;
+using Microsoft.EntityFrameworkCore;
+using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host.Features.Templates.DeleteTemplate;
@@ -16,14 +17,16 @@ public sealed class DeleteTemplateEndpoint : IEndpoint
 
     private static async Task<IResult> Handle(
         Guid id,
-        ITemplateRepository repository,
+        TemplateDbContext db,
         ILogger<DeleteTemplateEndpoint> logger,
         CancellationToken ct)
     {
-        var entity = await repository.GetByIdAsync(id, ct)
+        var entity = await db.TemplateObjects
+            .FirstOrDefaultAsync(t => t.Id == id, ct)
             ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
 
-        await repository.DeleteAsync(entity, ct);
+        db.TemplateObjects.Remove(entity);
+        await db.SaveChangesAsync(ct);
 
         logger.LogInformation("Шаблонный объект с Id: {Id} удалён из БД", entity.Id);
 

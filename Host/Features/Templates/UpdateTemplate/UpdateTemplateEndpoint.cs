@@ -1,4 +1,6 @@
-using TemplateApi.Application.Services;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host.Features.Templates.UpdateTemplate;
@@ -12,25 +14,35 @@ public sealed class UpdateTemplateEndpoint : IEndpoint
             .WithTags("Templates")
             .Produces<Response>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .AddEndpointFilter<ValidationFilter<Request>>();
     }
 
     public record Request(string? TemplateName);
 
     public record Response(Guid Id, string? TemplateName);
 
+    public sealed class Validator : AbstractValidator<Request>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.TemplateName).NotEmpty().MaximumLength(200);
+        }
+    }
+
     private static async Task<IResult> Handle(
         Guid id,
         Request request,
-        ITemplateRepository repository,
+        TemplateDbContext db,
         ILogger<UpdateTemplateEndpoint> logger,
         CancellationToken ct)
     {
-        var entity = await repository.GetByIdAsync(id, ct)
+        var entity = await db.TemplateObjects
+            .FirstOrDefaultAsync(t => t.Id == id, ct)
             ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
 
         entity.Update(request.TemplateName);
-        await repository.UpdateAsync(entity, ct);
+        await db.SaveChangesAsync(ct);
 
         logger.LogInformation("Шаблонный объект с Id: {Id} изменён", entity.Id);
 

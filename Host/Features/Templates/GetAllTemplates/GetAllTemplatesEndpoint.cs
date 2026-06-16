@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using TemplateApi.Application;
-using TemplateApi.Application.Services;
+using Microsoft.EntityFrameworkCore;
+using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host.Features.Templates.GetAllTemplates;
@@ -23,16 +23,23 @@ public sealed class GetAllTemplatesEndpoint : IEndpoint
     private static async Task<IResult> Handle(
         [FromQuery] int offset,
         [FromQuery] int limit,
-        ITemplateRepository repository,
+        TemplateDbContext db,
         CancellationToken ct)
     {
-        var pagination = Pagination.Create(offset, limit);
-        var page = await repository.GetAllAsync(pagination, ct);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit, nameof(limit));
+        ArgumentOutOfRangeException.ThrowIfLessThan(offset, 0, nameof(offset));
 
-        var response = new Response(
-            page.Items.Select(t => new TemplateItem(t.Id, t.TemplateName)).ToList(),
-            page.TotalCount);
+        var total = await db.TemplateObjects.CountAsync(ct);
 
-        return Results.Ok(response);
+        var items = await db.TemplateObjects
+            .AsNoTracking()
+            .OrderBy(t => t.Id)
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        return Results.Ok(new Response(
+            items.Select(t => new TemplateItem(t.Id, t.TemplateName)).ToList(),
+            total));
     }
 }
