@@ -1,6 +1,5 @@
-﻿using TemplateApi.Application;
 using TemplateApi.Data;
-using TemplateApi.Web;
+using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host;
 
@@ -12,9 +11,8 @@ internal static class Startup
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        services.AddApplication();
         services.AddData(builder.Configuration);
-        services.AddTemplateControllers();
+        services.AddEndpoints();
     }
 
     public static ILogger CreateLogger()
@@ -35,6 +33,7 @@ internal static class Startup
         }
 
         app.UseHttpsRedirection();
-        app.MapControllers();
+        app.UseApiExceptionHandler();
+        app.MapEndpoints();
     }
 }

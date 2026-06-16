@@ -10,10 +10,9 @@
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
         <ProjectReference Include="..\Data\Data.csproj" />
-        <ProjectReference Include="..\Web\Web.csproj" />
+        <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
     <PropertyGroup>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <UserSecretsId>a66ba662-ed64-4fe3-9c92-e7218ca9f5c5</UserSecretsId>
     </PropertyGroup>
 </Project>
