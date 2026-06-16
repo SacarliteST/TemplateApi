@@ -1,3 +1,4 @@
+using Contracts;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
@@ -9,7 +10,7 @@ public sealed class UpdateTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPut("api/v1/pallets/{id:guid}", Handle)
+        app.MapPut(ApiRoutes.Template.TemplateObject, Handle)
             .WithName("UpdateTemplate")
             .WithTags("Templates")
             .Produces<Response>()

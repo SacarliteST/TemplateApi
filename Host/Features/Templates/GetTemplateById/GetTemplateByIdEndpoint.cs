@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
@@ -8,7 +9,7 @@ public sealed class GetTemplateByIdEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/v1/pallets/{id:guid}", Handle)
+        app.MapGet(ApiRoutes.Template.TemplateObject, Handle)
             .WithName("GetTemplateById")
             .WithTags("Templates")
             .Produces<Response>()

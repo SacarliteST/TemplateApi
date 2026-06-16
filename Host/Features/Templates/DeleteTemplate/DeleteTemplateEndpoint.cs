@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
@@ -8,7 +9,7 @@ public sealed class DeleteTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapDelete("api/v1/pallets/{id:guid}", Handle)
+        app.MapDelete(ApiRoutes.Template.TemplateObject, Handle)
             .WithName("DeleteTemplate")
             .WithTags("Templates")
             .Produces(StatusCodes.Status204NoContent)

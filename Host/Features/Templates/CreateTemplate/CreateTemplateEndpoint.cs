@@ -1,3 +1,4 @@
+using Contracts;
 using Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ public sealed class CreateTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/v1/pallets", Handle)
+        app.MapPost(ApiRoutes.Template.TemplateObjects, Handle)
             .WithName("CreateTemplate")
             .WithTags("Templates")
             .Produces<Response>(StatusCodes.Status201Created)
@@ -42,6 +43,6 @@ public sealed class CreateTemplateEndpoint : IEndpoint
 
         logger.LogInformation("Шаблонный объект с Id: {Id} добавлен в БД", entity.Id);
 
-        return Results.Created($"api/v1/pallets/{entity.Id}", new Response(entity.Id, entity.TemplateName));
+        return Results.Created(ApiRoutes.Template.ForTemplateObject(entity.Id), new Response(entity.Id, entity.TemplateName));
     }
 }

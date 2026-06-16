@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
@@ -9,7 +10,7 @@ public sealed class GetAllTemplatesEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("api/v1/pallets", Handle)
+        app.MapGet(ApiRoutes.Template.TemplateObjects, Handle)
             .WithName("GetAllTemplates")
             .WithTags("Templates")
             .Produces<Response>()
