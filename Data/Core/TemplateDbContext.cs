@@ -1,4 +1,4 @@
-﻿using Domain;
+using Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TemplateApi.Data.Core.Configurations;
@@ -8,11 +8,17 @@ namespace TemplateApi.Data.Core;
 /// <summary>
 /// Шаблон контекста базы данных
 /// </summary>
-internal class TemplateDbContext : DbContext
+public class TemplateDbContext : DbContext
 {
+    /// <summary>
+    /// Настройки подключения
+    /// </summary>
     protected readonly ConnectionOptions Options;
 
-    internal DbSet<TemplateObject> TemplateObjects { get; set; }
+    /// <summary>
+    /// Коллекция шаблонных объектов
+    /// </summary>
+    public DbSet<TemplateObject> TemplateObjects { get; set; }
 
     /// <summary>
     /// Конструктор контекста

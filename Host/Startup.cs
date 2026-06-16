@@ -1,3 +1,4 @@
+using FluentValidation;
 using TemplateApi.Data;
 using TemplateApi.Host.Common;
 
@@ -13,6 +14,7 @@ internal static class Startup
         services.AddSwaggerGen();
         services.AddData(builder.Configuration);
         services.AddEndpoints();
+        services.AddValidatorsFromAssemblyContaining<IHostMarker>();
     }
 
     public static ILogger CreateLogger()

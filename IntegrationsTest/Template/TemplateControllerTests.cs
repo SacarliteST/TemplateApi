@@ -1,4 +1,7 @@
-﻿using Shouldly;
+using System.Net;
+using System.Net.Http.Json;
+using Contracts.Template;
+using Shouldly;
 using TemplateApi.IntegrationsTest.infrastructure;
 using TemplateApi.TestsCommon;
 
@@ -76,5 +79,18 @@ public sealed class TemplateControllerTests : ApiTestBase
 
         // Assert
         await act.ShouldNotThrowAsync();
+    }
+
+    [Fact(DisplayName = "POST с пустым TemplateName возвращает 400")]
+    public async Task CreateTemplate_WithEmptyName_ShouldReturn400()
+    {
+        // Arrange
+        var request = new CreateOrUpdateTemplateRequest { TemplateName = "" };
+
+        // Act
+        var response = await HttpClient.PostAsJsonAsync("api/v1/pallets", request);
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
 }

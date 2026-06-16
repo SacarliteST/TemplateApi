@@ -1,4 +1,5 @@
-using TemplateApi.Application.Services;
+using Microsoft.EntityFrameworkCore;
+using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host.Features.Templates.GetTemplateById;
@@ -18,10 +19,12 @@ public sealed class GetTemplateByIdEndpoint : IEndpoint
 
     private static async Task<IResult> Handle(
         Guid id,
-        ITemplateRepository repository,
+        TemplateDbContext db,
         CancellationToken ct)
     {
-        var entity = await repository.GetByIdAsync(id, ct)
+        var entity = await db.TemplateObjects
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id, ct)
             ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
 
         return Results.Ok(new Response(entity.Id, entity.TemplateName));

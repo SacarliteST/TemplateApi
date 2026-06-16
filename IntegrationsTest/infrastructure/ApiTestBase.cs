@@ -1,4 +1,4 @@
-﻿using TemplateApi.Client.Template;
+using TemplateApi.Client.Template;
 
 namespace TemplateApi.IntegrationsTest.infrastructure;
 
@@ -9,9 +9,11 @@ namespace TemplateApi.IntegrationsTest.infrastructure;
 public abstract class ApiTestBase
 {
     protected readonly ITemplateClient TemplateClient;
+    protected readonly HttpClient HttpClient;
 
-    public ApiTestBase(TestApplication testApplication)
+    protected ApiTestBase(TestApplication testApplication)
     {
         TemplateClient = testApplication.TemplateClient;
+        HttpClient = testApplication.CreateClient();
     }
 }

@@ -1,5 +1,7 @@
 using Domain;
-using TemplateApi.Application.Services;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
 namespace TemplateApi.Host.Features.Templates.CreateTemplate;
@@ -12,21 +14,31 @@ public sealed class CreateTemplateEndpoint : IEndpoint
             .WithName("CreateTemplate")
             .WithTags("Templates")
             .Produces<Response>(StatusCodes.Status201Created)
-            .ProducesProblem(StatusCodes.Status400BadRequest);
+            .ProducesValidationProblem()
+            .AddEndpointFilter<ValidationFilter<Request>>();
     }
 
     public record Request(string? TemplateName);
 
     public record Response(Guid Id, string? TemplateName);
 
+    public sealed class Validator : AbstractValidator<Request>
+    {
+        public Validator()
+        {
+            RuleFor(x => x.TemplateName).NotEmpty().MaximumLength(200);
+        }
+    }
+
     private static async Task<IResult> Handle(
         Request request,
-        ITemplateRepository repository,
+        TemplateDbContext db,
         ILogger<CreateTemplateEndpoint> logger,
         CancellationToken ct)
     {
         var entity = TemplateObject.Create(request.TemplateName);
-        await repository.CreateAsync(entity, ct);
+        db.TemplateObjects.Add(entity);
+        await db.SaveChangesAsync(ct);
 
         logger.LogInformation("Шаблонный объект с Id: {Id} добавлен в БД", entity.Id);
 

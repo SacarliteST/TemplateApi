@@ -1,6 +1,9 @@
 ﻿namespace TemplateApi.Data.Core.Configurations;
 
-internal sealed class ConnectionOptions
+/// <summary>
+/// Параметры подключения к базе данных
+/// </summary>
+public sealed class ConnectionOptions
 {
     /// <summary>
     /// Ключ параметров
