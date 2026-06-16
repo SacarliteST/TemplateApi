@@ -11,7 +11,7 @@ namespace TemplateApi.Data.Core;
 public class TemplateDbContext : DbContext
 {
     /// <summary>
-    /// Настройки подключения
+    /// Настройки подключения (используются производными контекстами миграций)
     /// </summary>
     protected readonly ConnectionOptions Options;
 
@@ -38,10 +38,16 @@ public class TemplateDbContext : DbContext
     }
 
     /// <summary>
-    /// Конфигурация логирования
+    /// Конфигурация провайдера — только для design-time (миграции).
+    /// В рантайме контекст настраивается через AddDbContext в DI.
     /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        if (optionsBuilder.IsConfigured)
+        {
+            return;
+        }
+
         if (Options.ConnectionString is null)
         {
             throw new InvalidOperationException("Не задана строка подключения к базе данных");
@@ -58,8 +64,5 @@ public class TemplateDbContext : DbContext
             default:
                 throw new InvalidOperationException("Неизвестный тип провайдера базы данных");
         }
-#if DEBUG
-        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
-#endif
     }
 }

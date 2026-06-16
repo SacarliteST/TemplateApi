@@ -1,4 +1,6 @@
 using Contracts;
+using Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
@@ -9,14 +11,13 @@ public sealed class DeleteTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapDelete(ApiRoutes.Template.TemplateObject, Handle)
+        app.MapDelete(ApiRoutes.Template.ByIdRoute, Handle)
             .WithName("DeleteTemplate")
-            .WithTags("Templates")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
-    private static async Task<IResult> Handle(
+    private static async Task<NoContent> Handle(
         Guid id,
         TemplateDbContext db,
         ILogger<DeleteTemplateEndpoint> logger,
@@ -24,13 +25,13 @@ public sealed class DeleteTemplateEndpoint : IEndpoint
     {
         var entity = await db.TemplateObjects
             .FirstOrDefaultAsync(t => t.Id == id, ct)
-            ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
+            ?? throw new NotFoundException(nameof(TemplateObject), id);
 
         db.TemplateObjects.Remove(entity);
         await db.SaveChangesAsync(ct);
 
         logger.LogInformation("Шаблонный объект с Id: {Id} удалён из БД", entity.Id);
 
-        return Results.NoContent();
+        return TypedResults.NoContent();
     }
 }

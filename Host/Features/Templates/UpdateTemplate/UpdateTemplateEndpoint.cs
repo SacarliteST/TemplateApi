@@ -1,5 +1,7 @@
 using Contracts;
+using Domain;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
@@ -10,11 +12,10 @@ public sealed class UpdateTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPut(ApiRoutes.Template.TemplateObject, Handle)
+        app.MapPut(ApiRoutes.Template.ByIdRoute, Handle)
             .WithName("UpdateTemplate")
-            .WithTags("Templates")
             .Produces<Response>()
-            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status404NotFound)
             .AddEndpointFilter<ValidationFilter<Request>>();
     }
@@ -31,7 +32,7 @@ public sealed class UpdateTemplateEndpoint : IEndpoint
         }
     }
 
-    private static async Task<IResult> Handle(
+    private static async Task<Ok<Response>> Handle(
         Guid id,
         Request request,
         TemplateDbContext db,
@@ -40,13 +41,13 @@ public sealed class UpdateTemplateEndpoint : IEndpoint
     {
         var entity = await db.TemplateObjects
             .FirstOrDefaultAsync(t => t.Id == id, ct)
-            ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
+            ?? throw new NotFoundException(nameof(TemplateObject), id);
 
         entity.Update(request.TemplateName);
         await db.SaveChangesAsync(ct);
 
         logger.LogInformation("Шаблонный объект с Id: {Id} изменён", entity.Id);
 
-        return Results.Ok(new Response(entity.Id, entity.TemplateName));
+        return TypedResults.Ok(new Response(entity.Id, entity.TemplateName));
     }
 }

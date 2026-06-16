@@ -1,3 +1,5 @@
+using Contracts;
+
 namespace TemplateApi.Host.Common;
 
 public static class EndpointExtensions
@@ -18,12 +20,15 @@ public static class EndpointExtensions
 
     public static WebApplication MapEndpoints(this WebApplication app)
     {
+        var group = app.MapGroup(ApiRoutes.Template.TemplateObjects)
+                       .WithTags("Templates");
+
         using var scope = app.Services.CreateScope();
         var endpoints = scope.ServiceProvider.GetRequiredService<IEnumerable<IEndpoint>>();
 
         foreach (var endpoint in endpoints)
         {
-            endpoint.MapEndpoints(app);
+            endpoint.MapEndpoints(group);
         }
 
         return app;

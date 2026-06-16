@@ -1,4 +1,6 @@
 using Contracts;
+using Domain;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
@@ -9,16 +11,15 @@ public sealed class GetTemplateByIdEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet(ApiRoutes.Template.TemplateObject, Handle)
+        app.MapGet(ApiRoutes.Template.ByIdRoute, Handle)
             .WithName("GetTemplateById")
-            .WithTags("Templates")
             .Produces<Response>()
             .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     public record Response(Guid Id, string? TemplateName);
 
-    private static async Task<IResult> Handle(
+    private static async Task<Ok<Response>> Handle(
         Guid id,
         TemplateDbContext db,
         CancellationToken ct)
@@ -26,8 +27,8 @@ public sealed class GetTemplateByIdEndpoint : IEndpoint
         var entity = await db.TemplateObjects
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Id == id, ct)
-            ?? throw new KeyNotFoundException($"Шаблонный объект с Id: {id} не найден");
+            ?? throw new NotFoundException(nameof(TemplateObject), id);
 
-        return Results.Ok(new Response(entity.Id, entity.TemplateName));
+        return TypedResults.Ok(new Response(entity.Id, entity.TemplateName));
     }
 }

@@ -1,9 +1,10 @@
+using Domain;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TemplateApi.Host.Common;
 
-public static class ExceptionHandlerExtensions
+internal static class ExceptionHandlerExtensions
 {
     public static WebApplication UseApiExceptionHandler(this WebApplication app)
     {
@@ -16,14 +17,19 @@ public static class ExceptionHandlerExtensions
 
                 var statusCode = exception switch
                 {
+                    NotFoundException => StatusCodes.Status404NotFound,
                     ArgumentException => StatusCodes.Status400BadRequest,
-                    KeyNotFoundException => StatusCodes.Status404NotFound,
                     _ => StatusCodes.Status500InternalServerError
                 };
 
-                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                logger.LogError(exception, "Unhandled exception on {Method} {Path}",
-                    context.Request.Method, context.Request.Path);
+                var logger = context.RequestServices
+                    .GetRequiredService<ILogger<Program>>();
+
+                logger.LogError(
+                    exception,
+                    "Unhandled exception on {Method} {Path}",
+                    context.Request.Method,
+                    context.Request.Path);
 
                 context.Response.StatusCode = statusCode;
                 context.Response.ContentType = "application/problem+json";
@@ -42,8 +48,8 @@ public static class ExceptionHandlerExtensions
 
     private static string GetTitle(int statusCode) => statusCode switch
     {
-        StatusCodes.Status400BadRequest => "Bad Request",
         StatusCodes.Status404NotFound => "Not Found",
+        StatusCodes.Status400BadRequest => "Bad Request",
         _ => "Internal Server Error"
     };
 }

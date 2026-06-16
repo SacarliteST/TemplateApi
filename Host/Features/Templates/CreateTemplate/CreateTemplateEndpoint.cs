@@ -1,7 +1,7 @@
 using Contracts;
 using Domain;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.HttpResults;
 using TemplateApi.Data.Core;
 using TemplateApi.Host.Common;
 
@@ -11,9 +11,8 @@ public sealed class CreateTemplateEndpoint : IEndpoint
 {
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapPost(ApiRoutes.Template.TemplateObjects, Handle)
+        app.MapPost(ApiRoutes.Template.CollectionRoute, Handle)
             .WithName("CreateTemplate")
-            .WithTags("Templates")
             .Produces<Response>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .AddEndpointFilter<ValidationFilter<Request>>();
@@ -31,7 +30,7 @@ public sealed class CreateTemplateEndpoint : IEndpoint
         }
     }
 
-    private static async Task<IResult> Handle(
+    private static async Task<Created<Response>> Handle(
         Request request,
         TemplateDbContext db,
         ILogger<CreateTemplateEndpoint> logger,
@@ -43,6 +42,7 @@ public sealed class CreateTemplateEndpoint : IEndpoint
 
         logger.LogInformation("Шаблонный объект с Id: {Id} добавлен в БД", entity.Id);
 
-        return Results.Created(ApiRoutes.Template.ForTemplateObject(entity.Id), new Response(entity.Id, entity.TemplateName));
+        var response = new Response(entity.Id, entity.TemplateName);
+        return TypedResults.Created(ApiRoutes.Template.ForTemplateObject(entity.Id), response);
     }
 }

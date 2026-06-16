@@ -1,4 +1,4 @@
-﻿namespace Contracts;
+namespace Contracts;
 
 /// <summary>
 /// Пути к API
@@ -6,38 +6,49 @@
 public static class ApiRoutes
 {
     /// <summary>
-    /// Общий префикс Api
+    /// Общий префикс Api v1
     /// </summary>
     public const string PrefixV1 = "api/v1";
 
     /// <summary>
-    /// Задаёт URL
+    /// Маршруты ресурса Template
     /// </summary>
     public static class Template
     {
         /// <summary>
-        /// Все шаблонные объекты
+        /// Коллекция шаблонов (абсолютный путь, используется клиентом и сервером как база группы)
         /// </summary>
-        public const string TemplateObjects = PrefixV1 + "/pallets";
+        public const string TemplateObjects = PrefixV1 + "/templates";
 
         /// <summary>
-        /// шаблонный объект по Id
+        /// Шаблон по идентификатору (абсолютный путь)
         /// </summary>
         public const string TemplateObject = TemplateObjects + "/{id}";
 
         /// <summary>
-        /// Возвращает url для страницы коробок
+        /// Относительный маршрут коллекции внутри группы
+        /// </summary>
+        public const string CollectionRoute = "";
+
+        /// <summary>
+        /// Относительный маршрут единичного ресурса внутри группы
+        /// </summary>
+        public const string ByIdRoute = "{id}";
+
+        /// <summary>
+        /// Формирует абсолютный URL для конкретного шаблона
+        /// </summary>
+        public static string ForTemplateObject(Guid id)
+            => ReplaceUrlSegment(TemplateObject, "id", id.ToString());
+
+        /// <summary>
+        /// Формирует абсолютный URL с параметрами пагинации
         /// </summary>
         public static string ForTemplateObjectPagination(int offset, int limit)
             => ReplaceUrlSegments(
                 TemplateObjects + "?offset={offset}&limit={limit}",
                 ("offset", offset.ToString()),
                 ("limit", limit.ToString()));
-
-        /// <summary>
-        /// Создаёт ссылку на созданный шаблонный объект
-        /// </summary>
-        public static string ForTemplateObject(Guid id) => ReplaceUrlSegment(TemplateObject, "id", id.ToString());
 
         private static string ReplaceUrlSegment(string template, string name, string value)
         {
@@ -46,6 +57,6 @@ public static class ApiRoutes
         }
 
         private static string ReplaceUrlSegments(string template, params (string Name, string Value)[] segments)
-            => segments.Aggregate(template, (current, segment) => ReplaceUrlSegment(template, segment.Name, segment.Value));
+            => segments.Aggregate(template, (current, segment) => ReplaceUrlSegment(current, segment.Name, segment.Value));
     }
 }
